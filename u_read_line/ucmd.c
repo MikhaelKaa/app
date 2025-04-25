@@ -1,6 +1,7 @@
 
 #include <string.h> // strcmp
 #include <stdio.h>  // printf
+#include <stdint.h>
 #include "term_gxf.h"
 #include "ucmd.h"
 #include "microrl.h"
