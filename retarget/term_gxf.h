@@ -6,7 +6,7 @@
 #define ESC "\033"
 
 //Format text
-#define RESET 		0
+#define TG_RESET 		0
 #define BRIGHT 		1
 #define DIM			2
 #define UNDERSCORE	3
