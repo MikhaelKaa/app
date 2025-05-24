@@ -12,6 +12,9 @@
 #include "k1946vk035.h"
 #endif // K1946VK035
 
+#ifdef USE_MDR1986VE9x
+#include "k1986be92fi.h"
+#endif // USE_MDR1986VE9x
 
 #ifndef PRINTF_TX_FUNC
 #error "define PRINTF_TX_FUNC"
