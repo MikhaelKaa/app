@@ -36,7 +36,6 @@ static volatile uint32_t uart_buf_cnt_in = 0;
 #define RETARGET_UART_BAUD 115200
 
 void printf_init(void) {
-    // TX
     memset((void *)PRINTF_TX_BUF, 0U, USART_TX_DMA_BUF_SIZE);
 
     PORT_InitTypeDef PORT_InitStructure;
@@ -66,25 +65,20 @@ void printf_init(void) {
 
     RST_CLK_PCLKcmd(RST_CLK_PCLK_UART2, ENABLE);
 
-    UART_InitStructure.UART_BaudRate = RETARGET_UART_BAUD; 
-    UART_InitStructure.UART_WordLength = UART_WordLength8b;
-    UART_InitStructure.UART_StopBits = UART_StopBits1;
-    UART_InitStructure.UART_Parity = UART_Parity_Even;
-    UART_InitStructure.UART_FIFOMode = UART_FIFO_OFF;
+    UART_InitStructure.UART_BaudRate    = RETARGET_UART_BAUD; 
+    UART_InitStructure.UART_WordLength  = UART_WordLength8b;
+    UART_InitStructure.UART_StopBits    = UART_StopBits1;
+    UART_InitStructure.UART_Parity      = UART_Parity_Even;
+    UART_InitStructure.UART_FIFOMode    = UART_FIFO_OFF;
     UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_RXE | UART_HardwareFlowControl_TXE;
 
     NVIC_SetPriority(UART2_IRQn, 7);
     NVIC_EnableIRQ(UART2_IRQn);
 
-    // UART_DMAConfig (MDR_UART2, UART_IT_FIFO_LVL_12words, UART_IT_FIFO_LVL_12words);
-    // UART_DMACmd(MDR_UART2, UART_DMA_RXE | UART_DMA_ONERR, ENABLE);
-
     UART_BRGInit(MDR_UART2, UART_HCLKdiv1);
     UART_ITConfig (MDR_UART2, UART_IT_RX, ENABLE);
     UART_Init(MDR_UART2, &UART_InitStructure);
     UART_Cmd(MDR_UART2, ENABLE);
-    // RX
-    
     
     setvbuf(stdin, NULL, _IONBF, 0);
 }
@@ -100,6 +94,22 @@ static inline int retarget_put_char_test(uint8_t* buf, int len)
     }
     return 0;
 }
+
+
+void UART2_IRQHandler( void )
+{
+    if( UART_GetITStatus(MDR_UART2, UART_IT_TX ) == SET )
+    {
+        UART_ClearITPendingBit(MDR_UART2, UART_IT_TX);
+    }
+
+    if( UART_GetITStatus(MDR_UART2, UART_IT_RX ) == SET )
+    {
+        rx_buf[uart_buf_cnt_in++%RETARGET_RX_BUF_SIZE] = UART_ReceiveData(MDR_UART2); // Данные в буфер
+        UART_ClearITPendingBit(MDR_UART2, UART_IT_RX);
+    }
+}
+
 
 // // UART0 Recieve interrupt
 // void UART0_RX_IRQHandler(void) {
