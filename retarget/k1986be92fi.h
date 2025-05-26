@@ -41,7 +41,8 @@ void printf_init(void) {
     PORT_InitTypeDef PORT_InitStructure;
     UART_InitTypeDef UART_InitStructure;
 
-
+    // Тактирование GPIO.
+    // MDR_RST_CLK->PER_CLOCK |= RST_CLK_PCLK_PORTF;
     RST_CLK_PCLKcmd(RST_CLK_PCLK_PORTF, ENABLE);
 
     PORT_InitStructure.PORT_PULL_UP = PORT_PULL_UP_OFF;
@@ -68,15 +69,15 @@ void printf_init(void) {
     UART_InitStructure.UART_BaudRate    = RETARGET_UART_BAUD; 
     UART_InitStructure.UART_WordLength  = UART_WordLength8b;
     UART_InitStructure.UART_StopBits    = UART_StopBits1;
-    UART_InitStructure.UART_Parity      = UART_Parity_Even;
-    UART_InitStructure.UART_FIFOMode    = UART_FIFO_OFF;
+    UART_InitStructure.UART_Parity      = UART_Parity_No;
+    UART_InitStructure.UART_FIFOMode    = UART_FIFO_ON;
     UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_RXE | UART_HardwareFlowControl_TXE;
 
     NVIC_SetPriority(UART2_IRQn, 7);
     NVIC_EnableIRQ(UART2_IRQn);
 
     UART_BRGInit(MDR_UART2, UART_HCLKdiv1);
-    UART_ITConfig (MDR_UART2, UART_IT_RX, ENABLE);
+    UART_ITConfig (MDR_UART2, UART_IT_RX | UART_IT_RT, ENABLE);
     UART_Init(MDR_UART2, &UART_InitStructure);
     UART_Cmd(MDR_UART2, ENABLE);
     
@@ -89,8 +90,8 @@ void printf_init(void) {
 static inline int retarget_put_char_test(uint8_t* buf, int len)
 {
     while (len--) {
-        UART_SendData(MDR_UART2, *buf++);
         while (MDR_UART2->FR & UART_FR_BUSY) {}
+        UART_SendData(MDR_UART2, *buf++);
     }
     return 0;
 }
@@ -105,8 +106,22 @@ void UART2_IRQHandler( void )
 
     if( UART_GetITStatus(MDR_UART2, UART_IT_RX ) == SET )
     {
-        rx_buf[uart_buf_cnt_in++%RETARGET_RX_BUF_SIZE] = UART_ReceiveData(MDR_UART2); // Данные в буфер
+        while ((MDR_UART2->FR & UART_FR_RXFE) == RESET)
+        {
+            rx_buf[uart_buf_cnt_in++%RETARGET_RX_BUF_SIZE] = UART_ReceiveData(MDR_UART2); // Данные в буфер
+        }
+        
         UART_ClearITPendingBit(MDR_UART2, UART_IT_RX);
+    }
+
+    if( UART_GetITStatus(MDR_UART2, UART_IT_RT ) == SET )
+    {
+        while ((MDR_UART2->FR & UART_FR_RXFE) == RESET)
+        {
+            rx_buf[uart_buf_cnt_in++%RETARGET_RX_BUF_SIZE] = UART_ReceiveData(MDR_UART2); // Данные в буфер
+        }
+        
+        UART_ClearITPendingBit(MDR_UART2, UART_IT_RT);
     }
 }
 
