@@ -127,7 +127,7 @@ static inline void us_timer_init(void)
     TIMER_BRGInit(US_TIMER, TIMER_HCLKdiv1);
     TIMER_CntStructInit(&us_timer);
     us_timer.TIMER_CounterMode = TIMER_CntMode_ClkFixedDir;
-    us_timer.TIMER_Period = 0xffffffff;
+    us_timer.TIMER_Period = 0xffff;
     TIMER_CntInit(US_TIMER, &us_timer);
     TIMER_Cmd(US_TIMER, ENABLE);
 }
