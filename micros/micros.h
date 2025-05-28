@@ -37,10 +37,10 @@
 
 #ifdef USE_HAL_DRIVER
 #include "main.h"
-// TODO: reanme to us_init
-__STATIC_INLINE void DWT_Init(void)
+__STATIC_INLINE void us_init(void)
 {
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // Разрешаем использовать счётчик.
+    DWT->CYCCNT       = 0;
     DWT->CTRL        |= DWT_CTRL_CYCCNTENA_Msk;     // Запускаем счётчик.
 }
 
@@ -48,27 +48,18 @@ __STATIC_INLINE void delay_us(uint32_t us) {
     // На первый взгляд работает. Точных замеров не делал, 
     // наверное стоит добавить калибровочные значения.
     uint32_t us_count_tick = (uint32_t)((uint64_t)us * SystemCoreClock / 1000000U);
-    // uint32_t us_count_tick = us * (SystemCoreClock / 1000000U);
     uint32_t start_tick = DWT->CYCCNT;
     
     // Учитываем переполнение счётчика:
     while ((DWT->CYCCNT - start_tick) < us_count_tick);
 }
 
-// __STATIC_INLINE void delay_us(uint32_t us)
-// {
-//     uint32_t us_count_tick =  us * (SystemCoreClock / 1000000U);
-//     uint32_t us_tick_now   = DWT->CYCCNT;
-//     // TODO: тут будет сбоить - не учитывается переполнение CYCCNT.
-//     // Молодец, ты нашел это место :)
-//     while(DWT->CYCCNT < (us_count_tick + us_tick_now));
-// }
-
 __STATIC_INLINE uint32_t micros(void){
     return  DWT->CYCCNT / (SystemCoreClock / 1000000U);
 }
 #endif /* USE_HAL_DRIVER */
 
+// M Kaa
 #ifdef USE_MDR1986VE1T
 #include <stdint.h>
 #include "MDR32F9Qx_rst_clk.h"
