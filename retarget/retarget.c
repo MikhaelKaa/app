@@ -8,6 +8,11 @@
 #include <string.h>
 #include "retarget.h"
 
+#ifdef USE_HAL_DRIVER
+#include "STM32_hal.h"
+#endif // USE_HAL_DRIVER
+
+
 #ifdef K1946VK035
 #include "k1946vk035.h"
 #endif // K1946VK035

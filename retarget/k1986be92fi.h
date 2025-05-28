@@ -1,7 +1,7 @@
-// Header: реализация printf scanf для k1946vk035.
-// File Name: k1946vk035.h
+// Header: реализация printf scanf для К1986ВЕ92FI (маркировка MDR1211FI).
+// File Name: k1986be92fi.h
 // Author: Михаил Каа
-// Date: 18.04.2025
+// Date: 25.05.2025
 // Version 0.1 - передача в блокирующем режиме, прием на прерываниях и FIFo
 
 #include <stdio.h>
