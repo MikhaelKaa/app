@@ -110,35 +110,36 @@ static inline  uint32_t micros(void){
 // #define US_TIMER_CLK (40*1000*1000) // TODO: magic number
 #define US_RST_CLK_PCLK (RST_CLK_PCLK_TIMER3)
 
-static inline void us_timer_init(void)
+static inline void ms_timer_init(void)
 {
     TIMER_CntInitTypeDef us_timer = { 0 };
     RST_CLK_PCLKcmd (US_RST_CLK_PCLK, ENABLE);
     TIMER_DeInit(US_TIMER);
-    TIMER_BRGInit(US_TIMER, TIMER_HCLKdiv1);
+    TIMER_BRGInit(US_TIMER, TIMER_HCLKdiv32);
     TIMER_CntStructInit(&us_timer);
     us_timer.TIMER_CounterMode = TIMER_CntMode_ClkFixedDir;
+    us_timer.TIMER_Prescaler = 1259;
     us_timer.TIMER_Period = 0xffff;
     TIMER_CntInit(US_TIMER, &us_timer);
     TIMER_Cmd(US_TIMER, ENABLE);
 }
 
-static inline  void delay_us(uint32_t us)
+static inline  void delay_ms(uint32_t us)
 {
 
     // На первый взгляд работает. Точных замеров не делал, 
     // наверное стоит добавить калибровочные значения.
     // uint32_t us_count_tick =  us * ( US_TIMER_CLK / 1000000U);
-    uint32_t us_count_tick = us * (SystemCoreClock / 1000000U);
-    uint32_t start_tick = US_TIMER->CNT;
+    uint16_t us_count_tick = us;// * 1000U;
+    uint16_t start_tick = US_TIMER->CNT;
     
     // Учитываем переполнение счётчика:
     while ((US_TIMER->CNT - start_tick) < us_count_tick);
 }
 
 // TODO: починить переполнение.
-static inline  uint32_t micros(void) {
-    return US_TIMER->CNT / (SystemCoreClock / 1000000U);
+static inline  uint32_t millis(void) {
+    return US_TIMER->CNT;
 }
 #endif /* USE_MDR32F9Q2I */
 

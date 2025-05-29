@@ -45,7 +45,10 @@ volatile ee_s32 seed5_volatile = 0;
 CORETIMETYPE
 barebones_clock()
 {
-    return micros();
+    #ifndef COREMARK_TIME
+    #error "define COREMARK_TIME function"
+    #endif // COREMARK_TIME
+    return COREMARK_TIME();
 }
 /* Define : TIMER_RES_DIVIDER
         Divider to trade off timer resolution and total time that can be
