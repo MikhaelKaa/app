@@ -17,7 +17,7 @@
 #include "k1946vk035.h"
 #endif // K1946VK035
 
-#ifdef USE_MDR1986VE9x
+#ifdef USE_K1986VE92xI
 #include "k1986be92fi.h"
 #endif // USE_MDR1986VE9x
 
