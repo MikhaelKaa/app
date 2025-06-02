@@ -124,7 +124,7 @@ static inline void ms_timer_init(void)
     TIMER_Cmd(US_TIMER, ENABLE);
 }
 
-static inline  void delay_ms(uint32_t us)
+static inline void delay_ms(uint32_t us)
 {
 
     // На первый взгляд работает. Точных замеров не делал, 
