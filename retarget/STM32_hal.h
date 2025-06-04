@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#ifdef STM32F429xx
+#if defined(STM32F429xx) || defined(STM32F401xC)
 #include "stm32f4xx_hal.h"
 #endif 
 extern UART_HandleTypeDef huart1;
@@ -22,10 +22,7 @@ uint8_t uart_dma_buf[2];
 #define RETARGET_RX_BUF_SIZE (1024U)
 static volatile uint8_t rx_buf[RETARGET_RX_BUF_SIZE] = {0};
 #define RETARGET_RX_BUF rx_buf
-// const uint32_t uart_rx_buf_size = RETARGET_RX_BUF_SIZE;
-// volatile uint8_t uart_rx_buf[RETARGET_RX_BUF_SIZE];
 volatile uint32_t uart_buf_cnt_in = 0;
-// volatile uint32_t uart_buf_cnt_out = 0;
 
 uint8_t uart_idle_flag = 0;
 
