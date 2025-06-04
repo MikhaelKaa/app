@@ -22,46 +22,34 @@ static volatile uint8_t rx_buf[RETARGET_RX_BUF_SIZE] = {0};
 static volatile uint32_t uart_buf_cnt_in = 0;
 #define RETARGET_RX_BUF rx_buf
 
-// extern uint32_t SystemCoreClock;
-// #define RETARGET_UART UART0
-// #define RETARGET_UART_NUM UART0_Num
-// #define RETARGET_UART_PORT GPIOB
-// #define RETARGET_UART_PORT_EN RCU_HCLKCFG_GPIOBEN_Msk
-// #define RETARGET_UART_PIN_TX_POS 10
-// #define RETARGET_UART_PIN_RX_POS 11
-// #define RETARGET_UART_RX_IRQHandler UART0_RX_IRQHandler
-// #define RETARGET_UART_RX_IRQn UART0_RX_IRQn
-// #ifndef RETARGET_UART_BAUD
-// #endif
 #define RETARGET_UART_BAUD 115200
 
 void printf_init(void) {
     memset((void *)PRINTF_TX_BUF, 0U, USART_TX_DMA_BUF_SIZE);
 
-    PORT_InitTypeDef PORT_InitStructure;
-    UART_InitTypeDef UART_InitStructure;
+    PORT_InitTypeDef PORT_InitStructure = {0};
+    UART_InitTypeDef UART_InitStructure = {0};
 
     // Тактирование GPIO.
-    // MDR_RST_CLK->PER_CLOCK |= RST_CLK_PCLK_PORTF;
     RST_CLK_PCLKcmd(RST_CLK_PCLK_PORTF, ENABLE);
 
-    PORT_InitStructure.PORT_PULL_UP = PORT_PULL_UP_OFF;
-    PORT_InitStructure.PORT_PULL_DOWN = PORT_PULL_DOWN_OFF;
-    PORT_InitStructure.PORT_PD_SHM = PORT_PD_SHM_OFF;
-    PORT_InitStructure.PORT_PD = PORT_PD_DRIVER;
-    PORT_InitStructure.PORT_GFEN = PORT_GFEN_OFF;
-    PORT_InitStructure.PORT_FUNC = PORT_FUNC_OVERRID;
-    PORT_InitStructure.PORT_SPEED = PORT_SPEED_MAXFAST;
-    PORT_InitStructure.PORT_MODE = PORT_MODE_DIGITAL;
+    PORT_InitStructure.PORT_PULL_UP     = PORT_PULL_UP_OFF;
+    PORT_InitStructure.PORT_PULL_DOWN   = PORT_PULL_DOWN_OFF;
+    PORT_InitStructure.PORT_PD_SHM      = PORT_PD_SHM_OFF;
+    PORT_InitStructure.PORT_PD          = PORT_PD_DRIVER;
+    PORT_InitStructure.PORT_GFEN        = PORT_GFEN_OFF;
+    PORT_InitStructure.PORT_FUNC        = PORT_FUNC_OVERRID;
+    PORT_InitStructure.PORT_SPEED       = PORT_SPEED_MAXFAST;
+    PORT_InitStructure.PORT_MODE        = PORT_MODE_DIGITAL;
 
     // UART_PIN_RX
-    PORT_InitStructure.PORT_OE = PORT_OE_IN;
-    PORT_InitStructure.PORT_Pin = PORT_Pin_0;
+    PORT_InitStructure.PORT_OE          = PORT_OE_IN;
+    PORT_InitStructure.PORT_Pin         = PORT_Pin_0;
     PORT_Init(MDR_PORTF, &PORT_InitStructure); 
 
     // UART_PIN_TX
-    PORT_InitStructure.PORT_OE = PORT_OE_OUT;
-    PORT_InitStructure.PORT_Pin = PORT_Pin_1; 
+    PORT_InitStructure.PORT_OE          = PORT_OE_OUT;
+    PORT_InitStructure.PORT_Pin         = PORT_Pin_1; 
     PORT_Init(MDR_PORTF, &PORT_InitStructure);
 
     RST_CLK_PCLKcmd(RST_CLK_PCLK_UART2, ENABLE);

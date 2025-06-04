@@ -46,6 +46,8 @@ void u1_rx_callback(uint8_t data) {
   RETARGET_RX_BUF[uart_buf_cnt_in++%RETARGET_RX_BUF_SIZE] = data;
 }
 
+
+#ifdef HAL_UART_xCallback
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
   if(huart->Instance == USART1) {
@@ -56,11 +58,10 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
     huart->gState     = HAL_UART_STATE_READY; 
     huart->RxState    = HAL_UART_STATE_READY; 
 
-    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    // __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     HAL_UART_Receive_DMA(&huart1, uart_dma_buf, sizeof(uart_dma_buf));
   }
 }
-
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -76,3 +77,4 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
     u1_rx_callback(uart_dma_buf[0]);
   }
 }
+#endif
