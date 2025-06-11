@@ -101,7 +101,7 @@ static inline  uint32_t micros(void){
 }
 #endif /* USE_MDR1986VE1T */
 
-#ifdef USE_MDR32F9Q2I
+#ifdef USE_K1986VE92xI
 #include <stdint.h>
 #include "MDR32FxQI_rst_clk.h"
 #include "MDR32FxQI_timer.h"
@@ -124,7 +124,7 @@ static inline void ms_timer_init(void)
     TIMER_Cmd(US_TIMER, ENABLE);
 }
 
-static inline  void delay_ms(uint32_t us)
+static inline void delay_ms(uint32_t us)
 {
 
     // На первый взгляд работает. Точных замеров не делал, 

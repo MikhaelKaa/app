@@ -14,4 +14,9 @@ void printf_init(void);
 /// @param  
 void printf_flush(void);
 
+#ifndef HAL_UART_xCallback
+extern uint8_t uart_dma_buf[2];
+void u1_rx_callback(uint8_t data);
+#endif
+
 #endif /* RETARGET */

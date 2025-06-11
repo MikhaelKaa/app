@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#ifdef STM32F429xx
+#if defined(STM32F429xx) || defined(STM32F401xC)
 #include "stm32f4xx_hal.h"
 #endif 
 extern UART_HandleTypeDef huart1;
@@ -22,10 +22,7 @@ uint8_t uart_dma_buf[2];
 #define RETARGET_RX_BUF_SIZE (1024U)
 static volatile uint8_t rx_buf[RETARGET_RX_BUF_SIZE] = {0};
 #define RETARGET_RX_BUF rx_buf
-// const uint32_t uart_rx_buf_size = RETARGET_RX_BUF_SIZE;
-// volatile uint8_t uart_rx_buf[RETARGET_RX_BUF_SIZE];
 volatile uint32_t uart_buf_cnt_in = 0;
-// volatile uint32_t uart_buf_cnt_out = 0;
 
 uint8_t uart_idle_flag = 0;
 
@@ -49,6 +46,8 @@ void u1_rx_callback(uint8_t data) {
   RETARGET_RX_BUF[uart_buf_cnt_in++%RETARGET_RX_BUF_SIZE] = data;
 }
 
+
+#ifdef HAL_UART_xCallback
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
   if(huart->Instance == USART1) {
@@ -59,11 +58,10 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
     huart->gState     = HAL_UART_STATE_READY; 
     huart->RxState    = HAL_UART_STATE_READY; 
 
-    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    // __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     HAL_UART_Receive_DMA(&huart1, uart_dma_buf, sizeof(uart_dma_buf));
   }
 }
-
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -79,3 +77,4 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
     u1_rx_callback(uart_dma_buf[0]);
   }
 }
+#endif
