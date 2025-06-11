@@ -8,7 +8,7 @@
 #include <string.h>
 
 void mem_dump(uint8_t *buf, uint32_t len);
-void mem_test(uint8_t *buf, uint32_t len);
+uint32_t mem_test(uint8_t *buf, uint32_t len);
 
 // ucmd handler for mem_dump.
 int ucmd_mem(int argc, char *argv[])
@@ -95,20 +95,53 @@ void mem_dump(uint8_t *buf, uint32_t len) {
     printf("\r\n");
 }
 
-void mem_test(uint8_t *buf, uint32_t len) {
-  uint32_t i = 0;
+uint32_t mem_test(uint8_t *buf, uint32_t len) {
+  uint32_t error_count = 0;
   volatile uint8_t *b = buf;
-  for (i = 0; i < len; i++) {
-    uint8_t temp = b[i];
-    b[i] = 0x00;
-    if(b[i] != 0x00) printf("error @0x%08lx \r\n", (uint32_t)(b+i));
-    b[i] = 0x55;
-    if(b[i] != 0x55) printf("error @0x%08lx \r\n", (uint32_t)(b+i));
-    b[i] = 0xff;
-    if(b[i] != 0xff) printf("error @0x%08lx \r\n", (uint32_t)(b+i));
-    b[i] = temp;
-    // if ((i % 1024) == 0 && i > 0) {
-    //   printf("mem test %lu/%lu bytes\r\n", i, len);
+  const uint8_t patterns[] = {0x00, 0x55, 0xAA, 0xFF};
+  const int num_patterns = sizeof(patterns)/sizeof(patterns[0]);
+  const uint32_t max_printf_msg = 10;
+
+  if (len == 0) {
+      printf("Zero-length test skipped\r\n");
+      return 0;
+  }
+
+  for (uint32_t i = 0; i < len; i++) {
+    uint8_t original = b[i];
+
+    // Тестируем все шаблоны
+    for (int p = 0; p < num_patterns; p++) {
+      uint8_t test_val = patterns[p];
+      b[i] = test_val;
+      
+      if (b[i] != test_val) {
+        if(error_count < max_printf_msg) printf("ERROR @ 0x%08lx: Wrote 0x%02X, Read 0x%02X\r\n", 
+          (uint32_t)(b + i), test_val, b[i]);
+        error_count++;
+      }
+    }
+
+    // Восстанавливаем значение с проверкой
+    b[i] = original;
+    if (b[i] != original) {
+      if(error_count < max_printf_msg) printf("RESTORE ERROR @ 0x%08lx! Original: 0x%02X, Current: 0x%02X\r\n",
+        (uint32_t)(b + i), original, b[i]);
+      error_count++;
+    }
+
+    // // Индикация прогресса
+    // if ((i % 8192) == 0) {
+    //   printf("Tested %lu/%lu bytes (errors: %lu)\r\n", i, len, error_count);
     // }
   }
+
+  // Итоговый отчет
+  if (error_count == 0) {
+    printf("Memory test PASSED: %lu bytes\r\n", len);
+  } else {
+    printf("Memory test FAILED! Errors: %lu/%lu bytes\r\n", error_count, len);
+  }
+  
+  return error_count;
 }
