@@ -8,6 +8,7 @@
 #include <string.h>
 
 void mem_dump(uint8_t *buf, uint32_t len);
+void mem_test(uint8_t *buf, uint32_t len);
 
 // ucmd handler for mem_dump.
 int ucmd_mem(int argc, char *argv[])
@@ -33,12 +34,21 @@ int ucmd_mem(int argc, char *argv[])
       }
       break;
     case 4:
+      // mem test adr len
+      if(strcmp(&argv[1][0], "test") == 0) {
+        sscanf(&argv[2][0], "%lx", &argv2); // adr
+        sscanf(&argv[3][0], "%lx", &argv3); // len
+        mem_test((uint8_t*)argv2, argv3);
+      }
+      
+
       // mem dump adr len
       if(strcmp(&argv[1][0], "dump") == 0) {
         sscanf(&argv[2][0], "%lx", &argv2); // adr
         sscanf(&argv[3][0], "%lx", &argv3); // len
         mem_dump((uint8_t*)argv2, argv3);
       }
+    
       // mem write adr data
       if(strcmp(&argv[1][0], "write") == 0) {
         sscanf(&argv[2][0], "%lx", &argv2); // adr
@@ -83,4 +93,22 @@ void mem_dump(uint8_t *buf, uint32_t len) {
         ++start;
     }
     printf("\r\n");
+}
+
+void mem_test(uint8_t *buf, uint32_t len) {
+  uint32_t i = 0;
+  volatile uint8_t *b = buf;
+  for (i = 0; i < len; i++) {
+    uint8_t temp = b[i];
+    b[i] = 0x00;
+    if(b[i] != 0x00) printf("error @0x%08lx \r\n", (uint32_t)(b+i));
+    b[i] = 0x55;
+    if(b[i] != 0x55) printf("error @0x%08lx \r\n", (uint32_t)(b+i));
+    b[i] = 0xff;
+    if(b[i] != 0xff) printf("error @0x%08lx \r\n", (uint32_t)(b+i));
+    b[i] = temp;
+    // if ((i % 1024) == 0 && i > 0) {
+    //   printf("mem test %lu/%lu bytes\r\n", i, len);
+    // }
+  }
 }
