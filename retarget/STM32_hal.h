@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#if defined(STM32F429xx) || defined(STM32F401xC)
+#if defined(STM32F429xx) || defined(STM32F401xC) || defined(STM32F407xx)
 #include "stm32f4xx_hal.h"
 #endif 
 extern UART_HandleTypeDef huart1;
