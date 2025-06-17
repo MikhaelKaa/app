@@ -13,6 +13,13 @@ typedef struct command {
     command_cb fn;      /**< the function to call when cmd is matched */
 } command_t;
 
+// Init.
+void ucmd_default_init(void);
+
+// call in loop.
+void ucmd_default_proc(void);
+
+
 int ucmd_parse(command_t[], int argc, const char **argv);
 
 int print_help_cb(int argc, char *argv[]);
@@ -21,9 +28,6 @@ void ucmd_default_print(const char * str);
 
 void default_sigint(void);
 
-void ucmd_default_init(void);
-
-void ucmd_default_proc(void);
 
 void ucmd_set_sigint(void (*sigintf)(void));
 void default_sigint(void);
