@@ -1,8 +1,10 @@
 #include "ucmd.h"
 #include <stdio.h>
+#include <string.h>
 
 void time_set(uint8_t h, uint8_t m, uint8_t s);
 void time_print(void);
+void time_update(void);
 
 int ucmd_time(int argc, char *argv[]) {
   static uint16_t h = 0, m = 0, s = 0;
@@ -11,7 +13,16 @@ int ucmd_time(int argc, char *argv[]) {
     time_print();
     return 0;
     break;
-    
+  
+  case 2:
+    if(strcmp(&argv[1][0], "u") == 0 || \
+       strcmp(&argv[1][0], "update") == 0) {
+      time_update();
+      // printf("time update\r\n"); 
+      return 0;
+    }
+    break;
+
   case 4:
     sscanf(&argv[1][0], "%hu", &h);
     sscanf(&argv[2][0], "%hu", &m);
@@ -26,6 +37,7 @@ int ucmd_time(int argc, char *argv[]) {
     return UCMD_CMD_NOT_FOUND;
     break;
   }
+  return -1;
 }
 
 
