@@ -1,7 +1,7 @@
 /* vim: set ai et ts=4 sw=4: */
 #include "stm32f4xx_hal.h"
 #include "ili9341.h"
-#include "cmsis_os.h"
+// #include "cmsis_os.h"
 
 static void ILI9341_Select() {
     HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_RESET);
