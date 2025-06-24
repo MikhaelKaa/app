@@ -53,10 +53,16 @@ __STATIC_INLINE void delay_us(uint32_t us) {
     // Учитываем переполнение счётчика:
     while ((DWT->CYCCNT - start_tick) < us_count_tick);
 }
-
-__STATIC_INLINE uint32_t micros(void){
+ 
+__STATIC_INLINE uint32_t micros(void) {
     return  DWT->CYCCNT / (SystemCoreClock / 1000000U);
 }
+
+// TODO: test me
+__STATIC_INLINE uint32_t millis(void) {
+    return  DWT->CYCCNT / (SystemCoreClock / 1000000U) / 1000U;
+}
+
 #endif /* USE_HAL_DRIVER */
 
 // M Kaa
