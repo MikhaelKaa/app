@@ -1,147 +1,203 @@
-// memory_man.c
-// Утилиты работы с памятью.
-// Михаил Каа
-// 01.03.2025
+/**
+ * @file memory_man.c
+ * @brief Memory utilities
+ * @author Mikhael Kaa (Михаил Каа)
+ * @date 21.06.2025
+ */
 
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
 
-void mem_dump(uint8_t *buf, uint32_t len);
-uint32_t mem_test(uint8_t *buf, uint32_t len);
+static void print_usage(void);
+static void mem_dump(uint8_t *buf, uint32_t len);
+static uint32_t mem_test(uint8_t *buf, uint32_t len);
 
-// ucmd handler for mem_dump.
-int ucmd_mem(int argc, char *argv[])
-{
-  static uint32_t argv2 = 0;
-  static uint32_t argv3 = 0;
-  static uint32_t argv4 = 0;
-  // static uint16_t argv5 = 0;
+#ifdef BAREMETAL
+int ucmd_mem(int argc, char *argv[]) {
+#define ENDL "\r\n"
+#else
+int main(int argc, char *argv[]) {
+#define ENDL "\n"
+#endif // BAREMETAL
 
-  switch (argc) {
+    uint32_t addr, data, len;
+    uint8_t *ptr;
+
+    switch (argc) {
     case 1:
     case 2:
-    printf("mem usage: mem dump adr len | read adr | write adr data |\r\n");
-    printf("\tcpy dst src len\r\n");
-      
-      break;
-
-    case 3:
-      // mem read adr
-      if(strcmp(&argv[1][0], "read") == 0) {
-        sscanf(&argv[2][0], "%lx", &argv2);
-        printf("0x%02x\r\n", *(uint8_t*)argv2);
-      }
-      break;
-    case 4:
-      // mem test adr len
-      if(strcmp(&argv[1][0], "test") == 0) {
-        sscanf(&argv[2][0], "%lx", &argv2); // adr
-        sscanf(&argv[3][0], "%lx", &argv3); // len
-        mem_test((uint8_t*)argv2, argv3);
-      }
-      
-
-      // mem dump adr len
-      if(strcmp(&argv[1][0], "dump") == 0) {
-        sscanf(&argv[2][0], "%lx", &argv2); // adr
-        sscanf(&argv[3][0], "%lx", &argv3); // len
-        mem_dump((uint8_t*)argv2, argv3);
-      }
+        print_usage();
+        return -EINVAL;
     
-      // mem write adr data
-      if(strcmp(&argv[1][0], "write") == 0) {
-        sscanf(&argv[2][0], "%lx", &argv2); // adr
-        sscanf(&argv[3][0], "%lx", &argv3); // data
-        *(uint8_t*)argv2 = argv3;
-      }
-      break;
-    case 5:
-      // mem copy
-      if(strcmp(&argv[1][0], "cpy") == 0) {
-        sscanf(&argv[2][0], "%lx", &argv2); // dst
-        sscanf(&argv[3][0], "%lx", &argv3); // src
-        sscanf(&argv[4][0], "%lx", &argv4); // len
-        memcpy((void*)argv2, (void*)argv3, argv4);
-      }
-      
-      break;
-    default:
-      break;
-    }
-  return 0;
-}
-
-// Dump memory at hex & ascii to serial console
-void mem_dump(uint8_t *buf, uint32_t len) {
-    uint32_t i = 0;
-    uint32_t start = (uint32_t)buf;
-    for (i = 0; i < len; ++i) {
-        if (i % 16 == 0) {printf("0x%08lx ", start);}
-        printf("%02x ", buf[i]);
-        // Каждые 16 значений.
-        if ((i + 1) % 16 == 0) {
-          // Вывод ascii символов.
-          printf(" ");
-          for(int32_t n = 15; n >= 0; n--) {
-            uint8_t c = buf[i-n];
-            if(c >= 32 && c <= 126) printf("%c", c);
-            else printf(".");
-          }
-          printf("\r\n");
+    case 3:
+        if (strcmp(argv[1], "read") == 0) {
+            if (sscanf(argv[2], "%lx", &addr) != 1) {
+                printf("Invalid address format" ENDL);
+                return -EINVAL;
+            }
+            ptr = (uint8_t *)addr;
+            printf("0x%02x" ENDL, *ptr);
+            return 0;
         }
-        ++start;
+        break;
+    
+    case 4:
+        if (strcmp(argv[1], "test") == 0) {
+            if (sscanf(argv[2], "%lx", &addr) != 1 ||
+                sscanf(argv[3], "%lx", &len) != 1) 
+            {
+                printf("Invalid arguments format" ENDL);
+                return -EINVAL;
+            }
+            return mem_test((uint8_t *)addr, len);
+        }
+        
+        if (strcmp(argv[1], "dump") == 0) {
+            if (sscanf(argv[2], "%lx", &addr) != 1 ||
+                sscanf(argv[3], "%lx", &len) != 1) 
+            {
+                printf("Invalid arguments format" ENDL);
+                return -EINVAL;
+            }
+            mem_dump((uint8_t *)addr, len);
+            return 0;
+        }
+        
+        if (strcmp(argv[1], "write") == 0) {
+            if (sscanf(argv[2], "%lx", &addr) != 1 ||
+                sscanf(argv[3], "%lx", &data) != 1) 
+            {
+                printf("Invalid arguments format" ENDL);
+                return -EINVAL;
+            }
+            ptr = (uint8_t *)addr;
+            *ptr = (uint8_t)data;
+            return 0;
+        }
+        break;
+    
+    case 5:
+        if (strcmp(argv[1], "cpy") == 0) {
+            uint32_t src;
+            if (sscanf(argv[2], "%lx", &addr) != 1 ||
+                sscanf(argv[3], "%lx", &src) != 1 ||
+                sscanf(argv[4], "%lx", &len) != 1) 
+            {
+                printf("Invalid arguments format" ENDL);
+                return -EINVAL;
+            }
+            memcpy((void *)addr, (void *)src, len);
+            return 0;
+        }
+        break;
+
+    default:
+        print_usage();
+        return -EINVAL;
     }
-    printf("\r\n");
+    
+    print_usage();
+    return -EINVAL;
 }
 
-uint32_t mem_test(uint8_t *buf, uint32_t len) {
-  uint32_t error_count = 0;
-  volatile uint8_t *b = buf;
-  const uint8_t patterns[] = {0x00, 0x55, 0xAA, 0xFF};
-  const int num_patterns = sizeof(patterns)/sizeof(patterns[0]);
-  const uint32_t max_printf_msg = 10;
-
-  if (len == 0) {
-      printf("Zero-length test skipped\r\n");
-      return 0;
-  }
-
-  for (uint32_t i = 0; i < len; i++) {
-    uint8_t original = b[i];
-
-    // Тестируем все шаблоны
-    for (int p = 0; p < num_patterns; p++) {
-      uint8_t test_val = patterns[p];
-      b[i] = test_val;
-      
-      if (b[i] != test_val) {
-        if(error_count < max_printf_msg) printf("ERROR @ 0x%08lx: Wrote 0x%02X, Read 0x%02X\r\n", 
-          (uint32_t)(b + i), test_val, b[i]);
-        error_count++;
-      }
-    }
-
-    // Восстанавливаем значение с проверкой
-    b[i] = original;
-    if (b[i] != original) {
-      if(error_count < max_printf_msg) printf("RESTORE ERROR @ 0x%08lx! Original: 0x%02X, Current: 0x%02X\r\n",
-        (uint32_t)(b + i), original, b[i]);
-      error_count++;
-    }
-
-    // // Индикация прогресса
-    // if ((i % 8192) == 0) {
-    //   printf("Tested %lu/%lu bytes (errors: %lu)\r\n", i, len, error_count);
-    // }
-  }
-
-  // Итоговый отчет
-  if (error_count == 0) {
-    printf("Memory test PASSED: %lu bytes\r\n", len);
-  } else {
-    printf("Memory test FAILED! Errors: %lu/%lu bytes\r\n", error_count, len);
-  }
-  
-  return error_count;
+static void print_usage(void) {
+    printf("Usage: mem <command> [arguments]" ENDL);
+    printf("Commands:" ENDL);
+    printf("  dump <adr> <len>    - Hexdump of memory region" ENDL);
+    printf("  read <adr>          - Read byte from address" ENDL);
+    printf("  write <adr> <data>  - Write byte to address" ENDL);
+    printf("  test <adr> <len>    - Test memory region" ENDL);
+    printf("  cpy <dst> <src> <len> - Copy memory block" ENDL);
 }
+
+static void mem_dump(uint8_t *buf, uint32_t len) {
+    uint32_t i = 0;
+    uint32_t current_addr = (uint32_t)buf;
+    const uint32_t bytes_per_line = 16;
+    
+    while (i < len) {
+        /* Print address at start of each line */
+        printf("0x%08lx: ", (unsigned long)current_addr);
+        
+        /* Print hex values */
+        uint32_t bytes_printed = 0;
+        for (uint32_t j = 0; j < bytes_per_line; j++) {
+            if (i + j < len) {
+                printf("%02x ", buf[i + j]);
+                bytes_printed++;
+            } else {
+                printf("   "); /* Padding for incomplete lines */
+            }
+        }
+        
+        /* Print ASCII representation */
+        printf("| ");
+        for (uint32_t j = 0; j < bytes_printed; j++) {
+            uint8_t c = buf[i + j];
+            putchar((c >= 32 && c <= 126) ? c : '.');
+        }
+        printf("" ENDL);
+        
+        i += bytes_printed;
+        current_addr += bytes_printed;
+    }
+}
+
+static uint32_t mem_test(uint8_t *buf, uint32_t len) {
+    uint32_t error_count = 0;
+    volatile uint8_t *b = buf;
+    const uint8_t patterns[] = {0x00, 0x55, 0xAA, 0xFF};
+    const int num_patterns = sizeof(patterns) / sizeof(patterns[0]);
+    const uint32_t max_errors_to_print = 10;
+
+    if (len == 0) {
+        printf("Zero-length test skipped" ENDL);
+        return 0;
+    }
+
+    for (uint32_t i = 0; i < len; i++) {
+        uint8_t original = b[i];
+
+        /* Test patterns */
+        for (int p = 0; p < num_patterns; p++) {
+            uint8_t test_val = patterns[p];
+            b[i] = test_val;
+            
+            if (b[i] != test_val) {
+                if (error_count < max_errors_to_print) {
+                    printf("ERROR @ 0x%08lx: Wrote 0x%02X, Read 0x%02X" ENDL, 
+                          (unsigned long)(b + i), test_val, b[i]);
+                }
+                error_count++;
+            }
+        }
+
+        /* Restore original value */
+        b[i] = original;
+        if (b[i] != original) {
+            if (error_count < max_errors_to_print) {
+                printf("RESTORE ERROR @ 0x%08lx! Original: 0x%02X, Current: 0x%02X" ENDL,
+                      (unsigned long)(b + i), original, b[i]);
+            }
+            error_count++;
+        }
+
+        /* Progress indicator */
+        if ((i % 8192) == 0) {
+            printf("Tested %lu/%lu bytes (errors: %lu)" ENDL, i, len, error_count);
+        }
+    }
+
+    /* Final report */
+    if (error_count == 0) {
+        printf("Memory test PASSED: %lu bytes" ENDL, len);
+    } else {
+        printf("Memory test FAILED! Errors: %lu/%lu bytes" ENDL, error_count, len);
+    }
+    
+    return error_count;
+}
+
+#undef ENDL
