@@ -1,6 +1,7 @@
 #include "ucmd.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 void time_set(uint8_t h, uint8_t m, uint8_t s);
 void time_print(void);
