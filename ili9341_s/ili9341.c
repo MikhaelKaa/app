@@ -3,6 +3,11 @@
 #include "ili9341.h"
 // #include "cmsis_os.h"
 
+void ILI9341_back_light(bool state) {
+    HAL_GPIO_WritePin(ILI9341_BLK_GPIO_Port, ILI9341_BLK_Pin, state);
+}
+
+
 static void ILI9341_Select() {
     HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_RESET);
 }
