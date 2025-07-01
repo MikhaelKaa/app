@@ -8,11 +8,11 @@ void ILI9341_back_light(bool state) {
 }
 
 
-static void ILI9341_Select() {
+void ILI9341_Select(void) {
     HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_RESET);
 }
 
-void ILI9341_Unselect() {
+void ILI9341_Unselect(void) {
     HAL_GPIO_WritePin(ILI9341_CS_GPIO_Port, ILI9341_CS_Pin, GPIO_PIN_SET);
 }
 
@@ -226,7 +226,28 @@ void ILI9341_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
     ILI9341_Unselect();
 }
 
-static void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
+// void ILI9341_WriteChar_e(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
+//     uint32_t i, b, j;
+//     ILI9341_Select();
+//     ILI9341_SetAddressWindow(x, y, x+font.width-1, y+font.height-1);
+
+//     for(i = 0; i < font.height; i++) {
+//         b = font.data[(ch - 32) * font.height + i];
+//         for(j = 0; j < font.width; j++) {
+//             if((b << j) & 0x8000)  {
+//                 uint8_t data[] = { color >> 8, color & 0xFF };
+//                 ILI9341_WriteData(data, sizeof(data));
+//             } else {
+//                 uint8_t data[] = { bgcolor >> 8, bgcolor & 0xFF };
+//                 ILI9341_WriteData(data, sizeof(data));
+//             }
+//         }
+//     }
+//     ILI9341_Unselect();
+// }
+
+
+void ILI9341_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
     uint32_t i, b, j;
 
     ILI9341_SetAddressWindow(x, y, x+font.width-1, y+font.height-1);
