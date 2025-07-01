@@ -18,8 +18,8 @@ typedef enum {
 
 // Статический экземпляр терминала
 static terminal_t term = {
-    .cols =         24,
-    .rows =         12,
+    .cols =         45,
+    .rows =         24,
     .font_width =   7,
     .font_heigh =   10,
     .cursor_x =     0,
