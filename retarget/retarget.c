@@ -95,3 +95,44 @@ int _read(int file, char *ptr, int len) {
   }
   return len;
 }
+
+
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int _close(int fd) {
+    (void)fd;
+    return -1; // Всегда ошибка (нет файловой системы)
+}
+
+int _fstat(int fd, struct stat *st) {
+    if (fd < 3) { // STDIN/STDOUT/STDERR
+        st->st_mode = S_IFCHR; // Характеризуем как терминальное устройство
+        return 0;
+    }
+    errno = EBADF;
+    return -1;
+}
+
+int _isatty(int fd) {
+    return (fd < 3) ? 1 : 0; // Только стандартные потоки - терминалы
+}
+
+off_t _lseek(int fd, off_t offset, int whence) {
+    (void)offset;
+    (void)whence;
+    errno = ESPIPE; // "Illegal seek" - для потоковых устройств
+    return (off_t)-1;
+}
+
+int _getpid(void) {
+    return 1; // Минимальный допустимый PID
+}
+
+int _kill(int pid, int sig) {
+    (void)pid;
+    (void)sig;
+    errno = EPERM; // "Operation not permitted"
+    return -1;
+}
