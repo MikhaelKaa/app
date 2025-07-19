@@ -21,26 +21,26 @@
 #include "k1986be92fi.h"
 #endif // USE_MDR1986VE9x
 
-#ifndef PRINTF_TX_FUNC
-#error "define PRINTF_TX_FUNC"
-#endif // PRINTF_TX_FUNC
+#ifndef RETARGET_TX_FUNC
+#error "define RETARGET_TX_FUNC"
+#endif // RETARGET_TX_FUNC
 
-#ifndef USART_TX_DMA_BUF_SIZE
-#error "define USART_TX_DMA_BUF_SIZE"
-#endif // USART_TX_DMA_BUF_SIZE 
+#ifndef RETARGET_TX_BUF_SIZE
+#error "define RETARGET_TX_BUF_SIZE"
+#endif // RETARGET_TX_BUF_SIZE 
 
-#ifndef PRINTF_TX_BUF
-#error "define PRINTF_TX_BUF"
-#endif // PRINTF_TX_BUF 
+#ifndef RETARGET_TX_BUF
+#error "define RETARGET_TX_BUF"
+#endif // RETARGET_TX_BUF 
 
 /// @brief Указатель на буфер для хранения выхлопа printf.
-static uint8_t* printf_buf = PRINTF_TX_BUF;
+static uint8_t* printf_buf = RETARGET_TX_BUF;
 
 /// @brief Указатель на функцию для передачи данных.
-const int (*printf_buf_transmit)(uint8_t* buf, int len) = PRINTF_TX_FUNC;
+const int (*printf_buf_transmit)(uint8_t* buf, int len) = RETARGET_TX_FUNC;
 
 /// @brief Размер массива printf_buf.
-volatile uint32_t printf_buf_size = USART_TX_DMA_BUF_SIZE;
+volatile uint32_t printf_buf_size = RETARGET_TX_BUF_SIZE;
 
 /// @brief Счетчик символов в буфере printf.
 volatile int printf_cnt = 0U;

@@ -8,9 +8,9 @@
 #include "K1921VK035.h"
 #include <string.h>
 
-#define USART_TX_DMA_BUF_SIZE (512U)
-uint8_t u0_tx_buf[USART_TX_DMA_BUF_SIZE];
-#define PRINTF_TX_BUF u0_tx_buf
+#define RETARGET_TX_BUF_SIZE (512U)
+uint8_t u0_tx_buf[RETARGET_TX_BUF_SIZE];
+#define RETARGET_TX_BUF u0_tx_buf
 
 #define RETARGET_RX_BUF_SIZE (256U)
 static volatile uint8_t rx_buf[RETARGET_RX_BUF_SIZE] = {0};
@@ -33,7 +33,7 @@ extern uint32_t SystemCoreClock;
 
 void printf_init(void) {
     // TX
-    memset((void *)PRINTF_TX_BUF, 0U, USART_TX_DMA_BUF_SIZE);
+    memset((void *)RETARGET_TX_BUF, 0U, RETARGET_TX_BUF_SIZE);
     SystemCoreClockUpdate();
     uint32_t baud_icoef = SystemCoreClock / (16 * RETARGET_UART_BAUD);
     uint32_t baud_fcoef = ((SystemCoreClock / (16.0f * RETARGET_UART_BAUD) - baud_icoef) * 64 + 0.5f);
@@ -73,7 +73,7 @@ void printf_init(void) {
 }
 
 
-#define PRINTF_TX_FUNC retarget_put_char_test
+#define RETARGET_TX_FUNC retarget_put_char_test
 // Для теста сделаем передачу в блокирующем режиме.
 static inline int retarget_put_char_test(uint8_t* buf, int len)
 {

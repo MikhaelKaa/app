@@ -13,9 +13,9 @@
 #include "MDR32FxQI_port.h"
 
 
-#define USART_TX_DMA_BUF_SIZE (512U)
-uint8_t u0_tx_buf[USART_TX_DMA_BUF_SIZE];
-#define PRINTF_TX_BUF u0_tx_buf
+#define RETARGET_TX_BUF_SIZE (512U)
+uint8_t u0_tx_buf[RETARGET_TX_BUF_SIZE];
+#define RETARGET_TX_BUF u0_tx_buf
 
 #define RETARGET_RX_BUF_SIZE (256U)
 static volatile uint8_t rx_buf[RETARGET_RX_BUF_SIZE] = {0};
@@ -25,7 +25,7 @@ static volatile uint32_t uart_buf_cnt_in = 0;
 #define RETARGET_UART_BAUD 115200
 
 void printf_init(void) {
-    memset((void *)PRINTF_TX_BUF, 0U, USART_TX_DMA_BUF_SIZE);
+    memset((void *)RETARGET_TX_BUF, 0U, RETARGET_TX_BUF_SIZE);
 
     PORT_InitTypeDef PORT_InitStructure = {0};
     UART_InitTypeDef UART_InitStructure = {0};
@@ -73,7 +73,7 @@ void printf_init(void) {
 }
 
 
-#define PRINTF_TX_FUNC retarget_put_char_test
+#define RETARGET_TX_FUNC retarget_put_char_test
 // Для теста сделаем передачу в блокирующем режиме.
 static inline int retarget_put_char_test(uint8_t* buf, int len)
 {
