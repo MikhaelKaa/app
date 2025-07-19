@@ -1,7 +1,7 @@
 // Header: реализация printf scanf для stm32 HAL.
 // File Name: STM32_hal.h
 // Author: Михаил Каа
-// Date: 28.05.2025
+// Date: 19.07.2025
 
 #include <stdio.h>
 #include <string.h>
@@ -10,6 +10,7 @@
 #if defined(STM32F429xx) || defined(STM32F401xC) || defined(STM32F407xx)
 #include "stm32f4xx_hal.h"
 #endif 
+
 #if defined(STM32H743xx)
 #include "stm32h7xx_hal.h"
 #endif 
@@ -31,17 +32,23 @@
 #define RETARGET_UART_RAM_PRE
 #endif // RETARGET_UART_RAM_PRE
 
+#ifndef RETARGET_TX_BUF_SIZE
 #define RETARGET_TX_BUF_SIZE (4096U)
+#endif // RETARGET_TX_BUF_SIZE
+
+#ifndef RETARGET_RX_BUF_SIZE
 #define RETARGET_RX_BUF_SIZE (1024U)
+#endif // RETARGET_RX_BUF_SIZE
 
 #define RETARGET_TX_BUF tx_buf
 #define RETARGET_RX_BUF rx_buf
 #define RETARGET_TX_FUNC stm_uart_tx
 
-RETARGET_UART_RAM_PRE uint8_t uart_dma_buf[2];
+RETARGET_UART_RAM_PRE uint8_t uart_dma_buf[2] = {0};
 RETARGET_UART_RAM_PRE uint8_t tx_buf[RETARGET_TX_BUF_SIZE] = {0};
 RETARGET_UART_RAM_PRE static volatile uint8_t rx_buf[RETARGET_RX_BUF_SIZE] = {0};
 
+// TODO: комплементарная переменная в дугом файле, надо сделать единообразно.
 volatile uint32_t uart_buf_cnt_in = 0;
 
 // HAL uart device
