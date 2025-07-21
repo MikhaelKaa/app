@@ -9,6 +9,7 @@
 #define EVENT_METER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifndef EVENT_METER_BUF_LEN
 #define EVENT_METER_BUF_LEN 16
@@ -40,5 +41,17 @@ static inline void event_meter_record(event_meter_t* meter, uint32_t current_tim
 
 // Вывод статистики
 void event_meter_show(event_meter_t* meter);
+
+/**
+ * @brief Получение статистических данных
+ * @param meter Указатель на измеритель
+ * @param min Указатель для минимального значения (может быть NULL)
+ * @param max Указатель для максимального значения (может быть NULL)
+ * @param avg Указатель для среднего значения (может быть NULL)
+ * @return true - статистика доступна, false - недостаточно измерений
+ * 
+ * @note Если параметр min/max/avg равен NULL, соответствующее значение не вычисляется
+ */
+bool event_meter_get_stats(event_meter_t* meter, uint32_t* min, uint32_t* max, uint32_t* avg);
 
 #endif // EVENT_METER_H
